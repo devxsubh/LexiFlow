@@ -1,0 +1,206 @@
+import puppeteer from 'puppeteer';
+import logger from '~/config/logger';
+import APIError from '~/utils/apiError';
+import httpStatus from 'http-status';
+
+class PDFService {
+	async generatePDFFromHTML(htmlContent, options = {}) {
+		let browser;
+		try {
+			// Launch browser
+			browser = await puppeteer.launch({
+				headless: 'new',
+				args: ['--no-sandbox', '--disable-setuid-sandbox']
+			});
+
+			// Create new page
+			const page = await browser.newPage();
+
+			// Set content
+			await page.setContent(htmlContent, { waitUntil: 'networkidle0' });
+
+			// Configure PDF options
+			const pdfOptions = {
+				format: 'A4',
+				printBackground: true,
+				margin: {
+					top: '20mm',
+					right: '20mm',
+					bottom: '20mm',
+					left: '20mm'
+				},
+				...options
+			};
+
+			// Generate PDF
+			const pdfBuffer = await page.pdf(pdfOptions);
+
+			return pdfBuffer;
+		} catch (error) {
+			logger.error('PDF generation error:', error);
+			throw new APIError('Failed to generate PDF', httpStatus.INTERNAL_SERVER_ERROR);
+		} finally {
+			if (browser) {
+				await browser.close();
+			}
+		}
+	}
+
+	async generateContractPDF(contract) {
+		try {
+			// Create HTML content for the contract
+			const htmlContent = this.createContractHTML(contract);
+
+			// Generate PDF
+			const pdfBuffer = await this.generatePDFFromHTML(htmlContent);
+
+			return pdfBuffer;
+		} catch (error) {
+			logger.error('Contract PDF generation error:', error);
+			throw new APIError('Failed to generate contract PDF', httpStatus.INTERNAL_SERVER_ERROR);
+		}
+	}
+
+	createContractHTML(contract) {
+		const partiesHTML = contract.parties
+			.map(
+				(party) => `
+			<div class="party">
+				<h4>${party.role}</h4>
+				<p><strong>Name:</strong> ${party.name}</p>
+				<p><strong>Email:</strong> ${party.email}</p>
+				${party.aadhaar ? `<p><strong>Aadhaar:</strong> ${party.aadhaar}</p>` : ''}
+				${
+					party.dsc && party.dsc.serialNumber
+						? `
+					<div class="dsc-info">
+						<h5>Digital Signature Certificate</h5>
+						<p><strong>Serial Number:</strong> ${party.dsc.serialNumber}</p>
+						<p><strong>Valid From:</strong> ${new Date(party.dsc.validFrom).toLocaleDateString()}</p>
+						<p><strong>Valid To:</strong> ${new Date(party.dsc.validTo).toLocaleDateString()}</p>
+					</div>
+				`
+						: ''
+				}
+			</div>
+		`
+			)
+			.join('');
+
+		const contractHTML = `
+			<!DOCTYPE html>
+			<html lang="en">
+			<head>
+				<meta charset="UTF-8">
+				<meta name="viewport" content="width=device-width, initial-scale=1.0">
+				<title>${contract.title}</title>
+				<style>
+					body {
+						font-family: 'Times New Roman', serif;
+						line-height: 1.6;
+						margin: 0;
+						padding: 20px;
+						color: #333;
+					}
+					.header {
+						text-align: center;
+						margin-bottom: 30px;
+						border-bottom: 2px solid #333;
+						padding-bottom: 20px;
+					}
+					.contract-title {
+						font-size: 24px;
+						font-weight: bold;
+						margin-bottom: 10px;
+					}
+					.contract-info {
+						margin-bottom: 30px;
+					}
+					.parties-section {
+						margin-bottom: 30px;
+					}
+					.party {
+						margin-bottom: 20px;
+						padding: 15px;
+						border: 1px solid #ddd;
+						border-radius: 5px;
+					}
+					.party h4 {
+						margin: 0 0 10px 0;
+						color: #2c3e50;
+					}
+					.dsc-info {
+						margin-top: 10px;
+						padding: 10px;
+						background-color: #f8f9fa;
+						border-radius: 3px;
+					}
+					.dsc-info h5 {
+						margin: 0 0 10px 0;
+						color: #495057;
+					}
+					.contract-content {
+						margin-top: 30px;
+					}
+					.footer {
+						margin-top: 50px;
+						padding-top: 20px;
+						border-top: 1px solid #ddd;
+						font-size: 12px;
+						color: #666;
+					}
+					table {
+						width: 100%;
+						border-collapse: collapse;
+						margin: 10px 0;
+					}
+					table, th, td {
+						border: 1px solid #ddd;
+					}
+					th, td {
+						padding: 8px;
+						text-align: left;
+					}
+					th {
+						background-color: #f2f2f2;
+					}
+				</style>
+			</head>
+			<body>
+				<div class="header">
+					<div class="contract-title">${contract.title}</div>
+					<div>Contract ID: ${contract.lexiId}</div>
+				</div>
+
+				<div class="contract-info">
+					<p><strong>Type:</strong> ${contract.type}</p>
+					<p><strong>Description:</strong> ${contract.description}</p>
+					<p><strong>Jurisdiction:</strong> ${contract.jurisdiction}</p>
+					<p><strong>Start Date:</strong> ${new Date(contract.startDate).toLocaleDateString()}</p>
+					<p><strong>End Date:</strong> ${new Date(contract.endDate).toLocaleDateString()}</p>
+					<p><strong>Status:</strong> ${contract.status}</p>
+				</div>
+
+				<div class="parties-section">
+					<h3>Parties</h3>
+					${partiesHTML}
+				</div>
+
+				<div class="contract-content">
+					<h3>Contract Terms and Conditions</h3>
+					${contract.content}
+				</div>
+
+				<div class="footer">
+					<p>Generated on: ${new Date().toLocaleString()}</p>
+					<p>This document was generated by LexiFlow</p>
+				</div>
+			</body>
+			</html>
+		`;
+
+		return contractHTML;
+	}
+}
+
+export default new PDFService();

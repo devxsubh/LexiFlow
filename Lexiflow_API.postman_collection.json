@@ -1,0 +1,1163 @@
+{
+	"info": {
+		"_postman_id": "lexiflow-api-collection",
+		"name": "LexiFlow API",
+		"description": "Complete API collection for LexiFlow - Legal Contract Management System",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+		"_exporter_id": "lexiflow"
+	},
+	"item": [
+		{
+			"name": "Authentication",
+			"item": [
+				{
+					"name": "Check Username Availability",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/api/v1/auth/check-username?userName=johndoe",
+							"host": ["{{baseUrl}}"],
+							"path": ["api", "v1", "auth", "check-username"],
+							"query": [
+								{
+									"key": "userName",
+									"value": "johndoe",
+									"description": "Username to check availability"
+								}
+							]
+						},
+						"description": "Check if a username is available before signup. Returns whether the username exists or is available."
+					}
+				},
+				{
+					"name": "Sign Up",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"userName\": \"johndoe\",\n  \"email\": \"john.doe@example.com\",\n  \"password\": \"SecurePass123!\",\n  \"confirmPassword\": \"SecurePass123!\"\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/api/v1/auth/signup",
+							"host": ["{{baseUrl}}"],
+							"path": ["api", "v1", "auth", "signup"]
+						}
+					}
+				},
+				{
+					"name": "Sign In",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"if (pm.response.code === 200) {",
+									"    const jsonData = pm.response.json();",
+									"    if (jsonData.data && jsonData.data.tokens) {",
+									"        pm.environment.set('accessToken', jsonData.data.tokens.access.token);",
+									"        pm.environment.set('refreshToken', jsonData.data.tokens.refresh.token);",
+									"    }",
+									"}"
+								]
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"identifier\": \"john.doe@example.com\",\n  \"password\": \"SecurePass123!\"\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/api/v1/auth/signin",
+							"host": ["{{baseUrl}}"],
+							"path": ["api", "v1", "auth", "signin"]
+						}
+					}
+				},
+				{
+					"name": "Get Current User",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{accessToken}}"
+							}
+						],
+						"url": {
+							"raw": "{{baseUrl}}/api/v1/auth/current",
+							"host": ["{{baseUrl}}"],
+							"path": ["api", "v1", "auth", "current"]
+						}
+					}
+				},
+				{
+					"name": "Get Me",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{accessToken}}"
+							}
+						],
+						"url": {
+							"raw": "{{baseUrl}}/api/v1/auth/me",
+							"host": ["{{baseUrl}}"],
+							"path": ["api", "v1", "auth", "me"]
+						}
+					}
+				},
+				{
+					"name": "Update Me",
+					"request": {
+						"method": "PUT",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{accessToken}}"
+							},
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"firstName\": \"John Updated\",\n  \"lastName\": \"Doe Updated\"\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/api/v1/auth/me",
+							"host": ["{{baseUrl}}"],
+							"path": ["api", "v1", "auth", "me"]
+						}
+					}
+				},
+				{
+					"name": "Refresh Tokens",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"refreshToken\": \"{{refreshToken}}\"\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/api/v1/auth/refresh-tokens",
+							"host": ["{{baseUrl}}"],
+							"path": ["api", "v1", "auth", "refresh-tokens"]
+						}
+					}
+				},
+				{
+					"name": "Sign Out",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"refreshToken\": \"{{refreshToken}}\"\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/api/v1/auth/signout",
+							"host": ["{{baseUrl}}"],
+							"path": ["api", "v1", "auth", "signout"]
+						}
+					}
+				},
+				{
+					"name": "Forgot Password",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"email\": \"john.doe@example.com\"\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/api/v1/auth/forgot-password",
+							"host": ["{{baseUrl}}"],
+							"path": ["api", "v1", "auth", "forgot-password"]
+						}
+					}
+				},
+				{
+					"name": "Reset Password",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"email\": \"john.doe@example.com\",\n  \"otp\": \"123456\",\n  \"password\": \"NewSecurePass123!\",\n  \"confirmPassword\": \"NewSecurePass123!\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"description": "Reset password using OTP received via email. Requires email, 6-digit OTP, new password, and password confirmation.",
+						"url": {
+							"raw": "{{baseUrl}}/api/v1/auth/reset-password",
+							"host": ["{{baseUrl}}"],
+							"path": ["api", "v1", "auth", "reset-password"]
+						}
+					}
+				},
+				{
+					"name": "Send Verification Email",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{accessToken}}"
+							}
+						],
+						"url": {
+							"raw": "{{baseUrl}}/api/v1/auth/send-verification-email",
+							"host": ["{{baseUrl}}"],
+							"path": ["api", "v1", "auth", "send-verification-email"]
+						}
+					}
+				},
+				{
+					"name": "Verify Email",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"otp\": \"123456\"\n}",
+							"description": "Enter the 6-digit OTP received in your email"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/api/v1/auth/verify-email",
+							"host": ["{{baseUrl}}"],
+							"path": ["api", "v1", "auth", "verify-email"]
+						}
+					}
+				}
+			]
+		},
+		{
+			"name": "Contracts",
+			"item": [
+				{
+					"name": "Generate Contract (Simple Prompt)",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{accessToken}}"
+							},
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"prompt\": \"Create a service agreement between John Doe (john@example.com) and ABC Company (abc@company.com) for web development services starting from January 2024 for one year in India\"\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/api/v1/contracts/generate",
+							"host": ["{{baseUrl}}"],
+							"path": ["api", "v1", "contracts", "generate"]
+						}
+					}
+				},
+				{
+					"name": "Create Contract",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{accessToken}}"
+							},
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"title\": \"Service Agreement\",\n  \"type\": \"service_agreement\",\n  \"description\": \"Agreement for web development services\",\n  \"parties\": [\n    {\n      \"name\": \"John Doe\",\n      \"role\": \"Service Provider\",\n      \"email\": \"john@example.com\"\n    },\n    {\n      \"name\": \"ABC Company\",\n      \"role\": \"Client\",\n      \"email\": \"abc@company.com\"\n    }\n  ],\n  \"jurisdiction\": \"India\",\n  \"startDate\": \"2024-01-01\",\n  \"endDate\": \"2024-12-31\",\n  \"content\": [\n    {\n      \"id\": \"block-1\",\n      \"type\": \"heading\",\n      \"props\": { \"level\": 1 },\n      \"content\": \"Service Agreement\"\n    },\n    {\n      \"id\": \"block-2\",\n      \"type\": \"paragraph\",\n      \"content\": \"This agreement is made between the parties...\"\n    }\n  ]\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/api/v1/contracts",
+							"host": ["{{baseUrl}}"],
+							"path": ["api", "v1", "contracts"]
+						}
+					}
+				},
+				{
+					"name": "Get All Contracts",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{accessToken}}"
+							}
+						],
+						"url": {
+							"raw": "{{baseUrl}}/api/v1/contracts?page=1&limit=10&sortBy=createdAt&sortOrder=desc",
+							"host": ["{{baseUrl}}"],
+							"path": ["api", "v1", "contracts"],
+							"query": [
+								{
+									"key": "page",
+									"value": "1"
+								},
+								{
+									"key": "limit",
+									"value": "10"
+								},
+								{
+									"key": "sortBy",
+									"value": "createdAt"
+								},
+								{
+									"key": "sortOrder",
+									"value": "desc"
+								}
+							]
+						}
+					}
+				},
+				{
+					"name": "Get Contract by ID",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{accessToken}}"
+							}
+						],
+						"url": {
+							"raw": "{{baseUrl}}/api/v1/contracts/:contractId",
+							"host": ["{{baseUrl}}"],
+							"path": ["api", "v1", "contracts", ":contractId"],
+							"variable": [
+								{
+									"key": "contractId",
+									"value": ""
+								}
+							]
+						}
+					}
+				},
+				{
+					"name": "Update Contract",
+					"request": {
+						"method": "PUT",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{accessToken}}"
+							},
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"title\": \"Updated Service Agreement\",\n  \"status\": \"review\"\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/api/v1/contracts/:contractId",
+							"host": ["{{baseUrl}}"],
+							"path": ["api", "v1", "contracts", ":contractId"],
+							"variable": [
+								{
+									"key": "contractId",
+									"value": ""
+								}
+							]
+						}
+					}
+				},
+				{
+					"name": "Auto-save Contract",
+					"request": {
+						"method": "PATCH",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{accessToken}}"
+							},
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"content\": [\n    {\n      \"id\": \"block-1\",\n      \"type\": \"paragraph\",\n      \"content\": \"Updated content\"\n    }\n  ],\n  \"lastModified\": \"2024-01-15T10:30:00Z\"\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/api/v1/contracts/:contractId/autosave",
+							"host": ["{{baseUrl}}"],
+							"path": ["api", "v1", "contracts", ":contractId", "autosave"],
+							"variable": [
+								{
+									"key": "contractId",
+									"value": ""
+								}
+							]
+						}
+					}
+				},
+				{
+					"name": "Delete Contract",
+					"request": {
+						"method": "DELETE",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{accessToken}}"
+							}
+						],
+						"url": {
+							"raw": "{{baseUrl}}/api/v1/contracts/:contractId",
+							"host": ["{{baseUrl}}"],
+							"path": ["api", "v1", "contracts", ":contractId"],
+							"variable": [
+								{
+									"key": "contractId",
+									"value": ""
+								}
+							]
+						}
+					}
+				},
+				{
+					"name": "Download Contract PDF",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{accessToken}}"
+							}
+						],
+						"url": {
+							"raw": "{{baseUrl}}/api/v1/contracts/:contractId/download",
+							"host": ["{{baseUrl}}"],
+							"path": ["api", "v1", "contracts", ":contractId", "download"],
+							"variable": [
+								{
+									"key": "contractId",
+									"value": ""
+								}
+							]
+						}
+					}
+				},
+				{
+					"name": "Add to Favorites",
+					"request": {
+						"method": "PATCH",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{accessToken}}"
+							}
+						],
+						"url": {
+							"raw": "{{baseUrl}}/api/v1/contracts/:contractId/favorite",
+							"host": ["{{baseUrl}}"],
+							"path": ["api", "v1", "contracts", ":contractId", "favorite"],
+							"variable": [
+								{
+									"key": "contractId",
+									"value": ""
+								}
+							]
+						}
+					}
+				},
+				{
+					"name": "Remove from Favorites",
+					"request": {
+						"method": "PATCH",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{accessToken}}"
+							}
+						],
+						"url": {
+							"raw": "{{baseUrl}}/api/v1/contracts/:contractId/unfavorite",
+							"host": ["{{baseUrl}}"],
+							"path": ["api", "v1", "contracts", ":contractId", "unfavorite"],
+							"variable": [
+								{
+									"key": "contractId",
+									"value": ""
+								}
+							]
+						}
+					}
+				}
+			]
+		},
+		{
+			"name": "Subscriptions",
+			"item": [
+				{
+					"name": "Get All Plans",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{accessToken}}"
+							}
+						],
+						"url": {
+							"raw": "{{baseUrl}}/api/v1/subscriptions/plans",
+							"host": ["{{baseUrl}}"],
+							"path": ["api", "v1", "subscriptions", "plans"]
+						}
+					}
+				},
+				{
+					"name": "Get My Subscription",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{accessToken}}"
+							}
+						],
+						"url": {
+							"raw": "{{baseUrl}}/api/v1/subscriptions/my-subscription",
+							"host": ["{{baseUrl}}"],
+							"path": ["api", "v1", "subscriptions", "my-subscription"]
+						}
+					}
+				},
+				{
+					"name": "Get Active Subscription",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{accessToken}}"
+							}
+						],
+						"url": {
+							"raw": "{{baseUrl}}/api/v1/subscriptions/active",
+							"host": ["{{baseUrl}}"],
+							"path": ["api", "v1", "subscriptions", "active"]
+						}
+					}
+				},
+				{
+					"name": "Create Subscription Order",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{accessToken}}"
+							},
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"planId\": \"plan_id_here\",\n  \"interval\": \"monthly\"\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/api/v1/subscriptions/create-order",
+							"host": ["{{baseUrl}}"],
+							"path": ["api", "v1", "subscriptions", "create-order"]
+						}
+					}
+				},
+				{
+					"name": "Verify Payment",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{accessToken}}"
+							},
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"orderId\": \"order_id_from_razorpay\",\n  \"paymentId\": \"payment_id_from_razorpay\",\n  \"signature\": \"razorpay_signature\"\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/api/v1/subscriptions/verify-payment",
+							"host": ["{{baseUrl}}"],
+							"path": ["api", "v1", "subscriptions", "verify-payment"]
+						}
+					}
+				},
+				{
+					"name": "Cancel Subscription",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{accessToken}}"
+							}
+						],
+						"url": {
+							"raw": "{{baseUrl}}/api/v1/subscriptions/cancel",
+							"host": ["{{baseUrl}}"],
+							"path": ["api", "v1", "subscriptions", "cancel"]
+						}
+					}
+				}
+			]
+		},
+		{
+			"name": "Lexi AI",
+			"item": [
+				{
+					"name": "Chat with Lexi",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{accessToken}}"
+							},
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"message\": \"What are the key clauses I should include in a service agreement?\",\n  \"conversationId\": \"optional_conversation_id\"\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/api/v1/lexi/chat",
+							"host": ["{{baseUrl}}"],
+							"path": ["api", "v1", "lexi", "chat"]
+						}
+					}
+				},
+				{
+					"name": "Create Conversation",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{accessToken}}"
+							},
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"title\": \"Contract Discussion\",\n  \"description\": \"Discussion about service agreement\"\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/api/v1/lexi/conversations",
+							"host": ["{{baseUrl}}"],
+							"path": ["api", "v1", "lexi", "conversations"]
+						}
+					}
+				},
+				{
+					"name": "Get Conversations",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{accessToken}}"
+							}
+						],
+						"url": {
+							"raw": "{{baseUrl}}/api/v1/lexi/conversations",
+							"host": ["{{baseUrl}}"],
+							"path": ["api", "v1", "lexi", "conversations"]
+						}
+					}
+				},
+				{
+					"name": "Get Conversation by ID",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{accessToken}}"
+							}
+						],
+						"url": {
+							"raw": "{{baseUrl}}/api/v1/lexi/conversations/:conversationId",
+							"host": ["{{baseUrl}}"],
+							"path": ["api", "v1", "lexi", "conversations", ":conversationId"],
+							"variable": [
+								{
+									"key": "conversationId",
+									"value": ""
+								}
+							]
+						}
+					}
+				},
+				{
+					"name": "Analyze Risks",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{accessToken}}"
+							},
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"contractId\": \"contract_id_here\",\n  \"analysisType\": \"risk\"\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/api/v1/lexi/analyze",
+							"host": ["{{baseUrl}}"],
+							"path": ["api", "v1", "lexi", "analyze"]
+						}
+					}
+				}
+			]
+		},
+		{
+			"name": "Help Center",
+			"item": [
+				{
+					"name": "Create Ticket",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{accessToken}}"
+							},
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"subject\": \"Need help with contract generation\",\n  \"description\": \"I'm having trouble generating a contract\",\n  \"category\": \"technical\",\n  \"priority\": \"medium\"\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/api/v1/help-center",
+							"host": ["{{baseUrl}}"],
+							"path": ["api", "v1", "help-center"]
+						}
+					}
+				},
+				{
+					"name": "Get My Tickets",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{accessToken}}"
+							}
+						],
+						"url": {
+							"raw": "{{baseUrl}}/api/v1/help-center/my",
+							"host": ["{{baseUrl}}"],
+							"path": ["api", "v1", "help-center", "my"]
+						}
+					}
+				},
+				{
+					"name": "Get Ticket by ID",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{accessToken}}"
+							}
+						],
+						"url": {
+							"raw": "{{baseUrl}}/api/v1/help-center/:ticketId",
+							"host": ["{{baseUrl}}"],
+							"path": ["api", "v1", "help-center", ":ticketId"],
+							"variable": [
+								{
+									"key": "ticketId",
+									"value": ""
+								}
+							]
+						}
+					}
+				},
+				{
+					"name": "Get FAQs",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{accessToken}}"
+							}
+						],
+						"url": {
+							"raw": "{{baseUrl}}/api/v1/help-center/faqs",
+							"host": ["{{baseUrl}}"],
+							"path": ["api", "v1", "help-center", "faqs"]
+						}
+					}
+				}
+			]
+		},
+		{
+			"name": "Notifications",
+			"item": [
+				{
+					"name": "Get Notifications",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{accessToken}}"
+							}
+						],
+						"url": {
+							"raw": "{{baseUrl}}/api/v1/notifications?page=1&limit=20",
+							"host": ["{{baseUrl}}"],
+							"path": ["api", "v1", "notifications"],
+							"query": [
+								{
+									"key": "page",
+									"value": "1"
+								},
+								{
+									"key": "limit",
+									"value": "20"
+								}
+							]
+						}
+					}
+				},
+				{
+					"name": "Get Unread Count",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{accessToken}}"
+							}
+						],
+						"url": {
+							"raw": "{{baseUrl}}/api/v1/notifications/unread-count",
+							"host": ["{{baseUrl}}"],
+							"path": ["api", "v1", "notifications", "unread-count"]
+						}
+					}
+				},
+				{
+					"name": "Mark as Read",
+					"request": {
+						"method": "PUT",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{accessToken}}"
+							}
+						],
+						"url": {
+							"raw": "{{baseUrl}}/api/v1/notifications/:notificationId/read",
+							"host": ["{{baseUrl}}"],
+							"path": ["api", "v1", "notifications", ":notificationId", "read"],
+							"variable": [
+								{
+									"key": "notificationId",
+									"value": ""
+								}
+							]
+						}
+					}
+				},
+				{
+					"name": "Mark All as Read",
+					"request": {
+						"method": "PUT",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{accessToken}}"
+							}
+						],
+						"url": {
+							"raw": "{{baseUrl}}/api/v1/notifications/read-all",
+							"host": ["{{baseUrl}}"],
+							"path": ["api", "v1", "notifications", "read-all"]
+						}
+					}
+				}
+			]
+		},
+		{
+			"name": "Dashboard",
+			"item": [
+				{
+					"name": "Get Dashboard Stats",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{accessToken}}"
+							}
+						],
+						"url": {
+							"raw": "{{baseUrl}}/api/v1/dashboard/stats?period=30d",
+							"host": ["{{baseUrl}}"],
+							"path": ["api", "v1", "dashboard", "stats"],
+							"query": [
+								{
+									"key": "period",
+									"value": "30d"
+								}
+							]
+						}
+					}
+				},
+				{
+					"name": "Get Activity Overview",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{accessToken}}"
+							}
+						],
+						"url": {
+							"raw": "{{baseUrl}}/api/v1/dashboard/activity",
+							"host": ["{{baseUrl}}"],
+							"path": ["api", "v1", "dashboard", "activity"]
+						}
+					}
+				}
+			]
+		},
+		{
+			"name": "Users (Admin Only)",
+			"item": [
+				{
+					"name": "Get All Users",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{accessToken}}"
+							}
+						],
+						"url": {
+							"raw": "{{baseUrl}}/api/v1/users?page=1&limit=10",
+							"host": ["{{baseUrl}}"],
+							"path": ["api", "v1", "users"],
+							"query": [
+								{
+									"key": "page",
+									"value": "1"
+								},
+								{
+									"key": "limit",
+									"value": "10"
+								}
+							]
+						}
+					}
+				},
+				{
+					"name": "Get User by ID",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{accessToken}}"
+							}
+						],
+						"url": {
+							"raw": "{{baseUrl}}/api/v1/users/:userId",
+							"host": ["{{baseUrl}}"],
+							"path": ["api", "v1", "users", ":userId"],
+							"variable": [
+								{
+									"key": "userId",
+									"value": ""
+								}
+							]
+						}
+					}
+				}
+			]
+		},
+		{
+			"name": "Roles (Admin Only)",
+			"item": [
+				{
+					"name": "Get All Roles",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{accessToken}}"
+							}
+						],
+						"url": {
+							"raw": "{{baseUrl}}/api/v1/roles",
+							"host": ["{{baseUrl}}"],
+							"path": ["api", "v1", "roles"]
+						}
+					}
+				},
+				{
+					"name": "Get Role by ID",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{accessToken}}"
+							}
+						],
+						"url": {
+							"raw": "{{baseUrl}}/api/v1/roles/:roleId",
+							"host": ["{{baseUrl}}"],
+							"path": ["api", "v1", "roles", ":roleId"],
+							"variable": [
+								{
+									"key": "roleId",
+									"value": ""
+								}
+							]
+						}
+					}
+				}
+			]
+		},
+		{
+			"name": "Images",
+			"item": [
+				{
+					"name": "Upload Image",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{accessToken}}"
+							}
+						],
+						"body": {
+							"mode": "formdata",
+							"formdata": [
+								{
+									"key": "image",
+									"type": "file",
+									"src": []
+								}
+							]
+						},
+						"url": {
+							"raw": "{{baseUrl}}/api/v1/images/upload",
+							"host": ["{{baseUrl}}"],
+							"path": ["api", "v1", "images", "upload"]
+						}
+					}
+				}
+			]
+		}
+	],
+	"variable": [
+		{
+			"key": "baseUrl",
+			"value": "http://localhost:5000",
+			"type": "string"
+		},
+		{
+			"key": "accessToken",
+			"value": "",
+			"type": "string"
+		},
+		{
+			"key": "refreshToken",
+			"value": "",
+			"type": "string"
+		}
+	]
+}
+
