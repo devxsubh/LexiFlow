@@ -157,13 +157,6 @@ const rewriteSection = {
 	})
 };
 
-const suggestClause = {
-	body: Joi.object().keys({
-		context: Joi.string().required(),
-		type: Joi.string().required()
-	})
-};
-
 const generateAIContract = {
 	body: Joi.object().keys({
 		prompt: Joi.string().min(10).max(2000).required()
@@ -342,18 +335,6 @@ const sendContractEmail = {
 	})
 };
 
-const aiClauseAction = {
-	body: Joi.object({
-		action: Joi.string().valid('explain', 'simplify', 'improve', 'verify', 'risk', 'suggest', 'custom', 'other').required(),
-		text: Joi.string().min(5).required(),
-		customPrompt: Joi.when('action', {
-			is: Joi.valid('custom', 'other'),
-			then: Joi.string().min(5).required(),
-			otherwise: Joi.string().optional()
-		})
-	})
-};
-
 export default {
 	createContract,
 	getContract,
@@ -363,7 +344,6 @@ export default {
 	deleteContract,
 	generateSections,
 	rewriteSection,
-	suggestClause,
 	generateAIContract,
 	updateGeneratedContract,
 	generateShareableLink,
@@ -377,6 +357,5 @@ export default {
 	resolveContractComment,
 	compareMarketStandards,
 	sendContractEmail,
-	aiClauseAction,
 	downloadContractPDF
 };

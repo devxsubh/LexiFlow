@@ -96,34 +96,6 @@ class CacheService {
 		}
 	}
 
-	// Cache clauses
-	async cacheClauses(key, clauses, ttl = 1800) {
-		// 30 minutes
-		try {
-			const cacheKey = `clauses:${key}`;
-			this.cache.set(cacheKey, clauses);
-			this.ttlMap.set(cacheKey, Date.now() + ttl * 1000);
-			logger.debug(`Cached clauses: ${key}`);
-		} catch (error) {
-			logger.error('Error caching clauses:', error);
-		}
-	}
-
-	async getCachedClauses(key) {
-		try {
-			const cacheKey = `clauses:${key}`;
-			if (this.isExpired(cacheKey)) {
-				this.cache.delete(cacheKey);
-				this.ttlMap.delete(cacheKey);
-				return null;
-			}
-			return this.cache.get(cacheKey) || null;
-		} catch (error) {
-			logger.error('Error getting cached clauses:', error);
-			return null;
-		}
-	}
-
 	// Cache templates
 	async cacheTemplates(key, templates, ttl = 1800) {
 		// 30 minutes
@@ -264,33 +236,6 @@ class CacheService {
 		}
 	}
 
-	// Cache must-have clauses
-	async cacheMustHaveClauses(contractType, clauses, ttl = 7200) {
-		// 2 hours
-		try {
-			const cacheKey = `must_have_clauses:${contractType}`;
-			this.cache.set(cacheKey, clauses);
-			this.ttlMap.set(cacheKey, Date.now() + ttl * 1000);
-			logger.debug(`Cached must-have clauses for: ${contractType}`);
-		} catch (error) {
-			logger.error('Error caching must-have clauses:', error);
-		}
-	}
-
-	async getCachedMustHaveClauses(contractType) {
-		try {
-			const cacheKey = `must_have_clauses:${contractType}`;
-			if (this.isExpired(cacheKey)) {
-				this.cache.delete(cacheKey);
-				this.ttlMap.delete(cacheKey);
-				return null;
-			}
-			return this.cache.get(cacheKey) || null;
-		} catch (error) {
-			logger.error('Error getting cached must-have clauses:', error);
-			return null;
-		}
-	}
 
 	// Cache lawyer availability
 	async cacheLawyerAvailability(lawyerId, date, availability, ttl = 300) {
@@ -316,96 +261,6 @@ class CacheService {
 			return this.cache.get(cacheKey) || null;
 		} catch (error) {
 			logger.error('Error getting cached lawyer availability:', error);
-			return null;
-		}
-	}
-
-	// Cache contract types
-	async cacheContractTypes(key, contractTypes, ttl = 1800) {
-		try {
-			if (this.isExpired(key)) {
-				this.cache.delete(key);
-				this.ttlMap.delete(key);
-			}
-			this.cache.set(key, contractTypes);
-			this.ttlMap.set(key, Date.now() + ttl * 1000);
-			logger.debug('Cached contract types');
-		} catch (error) {
-			logger.error('Error caching contract types:', error);
-		}
-	}
-
-	// Get cached contract types
-	async getCachedContractTypes(key) {
-		try {
-			if (this.isExpired(key)) {
-				this.cache.delete(key);
-				this.ttlMap.delete(key);
-				return null;
-			}
-			return this.cache.get(key) || null;
-		} catch (error) {
-			logger.error('Error getting cached contract types:', error);
-			return null;
-		}
-	}
-
-	// Cache jurisdictions
-	async cacheJurisdictions(key, jurisdictions, ttl = 1800) {
-		try {
-			if (this.isExpired(key)) {
-				this.cache.delete(key);
-				this.ttlMap.delete(key);
-			}
-			this.cache.set(key, jurisdictions);
-			this.ttlMap.set(key, Date.now() + ttl * 1000);
-			logger.debug('Cached jurisdictions');
-		} catch (error) {
-			logger.error('Error caching jurisdictions:', error);
-		}
-	}
-
-	// Get cached jurisdictions
-	async getCachedJurisdictions(key) {
-		try {
-			if (this.isExpired(key)) {
-				this.cache.delete(key);
-				this.ttlMap.delete(key);
-				return null;
-			}
-			return this.cache.get(key) || null;
-		} catch (error) {
-			logger.error('Error getting cached jurisdictions:', error);
-			return null;
-		}
-	}
-
-	// Cache dashboard stats
-	async cacheDashboardStats(key, stats, ttl = 300) {
-		try {
-			if (this.isExpired(key)) {
-				this.cache.delete(key);
-				this.ttlMap.delete(key);
-			}
-			this.cache.set(key, stats);
-			this.ttlMap.set(key, Date.now() + ttl * 1000);
-			logger.debug('Cached dashboard stats');
-		} catch (error) {
-			logger.error('Error caching dashboard stats:', error);
-		}
-	}
-
-	// Get cached dashboard stats
-	async getCachedDashboardStats(key) {
-		try {
-			if (this.isExpired(key)) {
-				this.cache.delete(key);
-				this.ttlMap.delete(key);
-				return null;
-			}
-			return this.cache.get(key) || null;
-		} catch (error) {
-			logger.error('Error getting cached dashboard stats:', error);
 			return null;
 		}
 	}

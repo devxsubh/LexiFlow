@@ -50,7 +50,7 @@ class ContractController {
 			}
 
 			const contract = await contractService.createContract(contractData, req.user.id);
-			
+
 			// Increment contract count (only for free tier users)
 			// Subscription users have unlimited contracts
 			if (req.subscriptionInfo && !req.subscriptionInfo.hasSubscription) {
@@ -316,28 +316,14 @@ class ContractController {
 		}
 	}
 
-	async suggestClause(req, res) {
-		try {
-			const { context, type } = req.body;
-			const clause = await aiService.suggestClause(context, type);
-			res.json({ clause });
-		} catch (error) {
-			if (error.message.includes('429') || error.message.includes('quota')) {
-				res.status(503).json({
-					error: 'AI service temporarily unavailable. Please try again later or contact support.',
-					fallback: true
-				});
-			} else {
-				res.status(400).json({ error: error.message });
-			}
-		}
-	}
-
 	generateAIContract = catchAsync(async (req, res) => {
 		const { prompt } = req.body;
 
 		if (!prompt || typeof prompt !== 'string' || prompt.trim().length < 10) {
-			throw new APIError('Please provide a detailed description of the contract you want to generate (minimum 10 characters)', httpStatus.BAD_REQUEST);
+			throw new APIError(
+				'Please provide a detailed description of the contract you want to generate (minimum 10 characters)',
+				httpStatus.BAD_REQUEST
+			);
 		}
 
 		// Generate contract from simple text prompt
@@ -1257,7 +1243,10 @@ ${parties.map((party, index) => `<p>${index + 1}. <strong>${party.name}</strong>
 				}
 				// Paragraphs
 				else if (trimmed.match(/^<p[^>]*>/i)) {
-					const text = trimmed.replace(/<[^>]*>/g, ' ').replace(/\s+/g, ' ').trim();
+					const text = trimmed
+						.replace(/<[^>]*>/g, ' ')
+						.replace(/\s+/g, ' ')
+						.trim();
 					if (text) {
 						blocks.push({
 							id: `block-${Date.now()}-${index}`,
@@ -1268,7 +1257,10 @@ ${parties.map((party, index) => `<p>${index + 1}. <strong>${party.name}</strong>
 				}
 				// Default to paragraph for any other content
 				else {
-					const text = trimmed.replace(/<[^>]*>/g, ' ').replace(/\s+/g, ' ').trim();
+					const text = trimmed
+						.replace(/<[^>]*>/g, ' ')
+						.replace(/\s+/g, ' ')
+						.trim();
 					if (text && text.length > 0) {
 						blocks.push({
 							id: `block-${Date.now()}-${index}`,
@@ -1281,7 +1273,10 @@ ${parties.map((party, index) => `<p>${index + 1}. <strong>${party.name}</strong>
 
 			// If no blocks were created, create a default paragraph
 			if (blocks.length === 0) {
-				const plainText = cleanHtml.replace(/<[^>]*>/g, ' ').replace(/\s+/g, ' ').trim();
+				const plainText = cleanHtml
+					.replace(/<[^>]*>/g, ' ')
+					.replace(/\s+/g, ' ')
+					.trim();
 				blocks.push({
 					id: `block-${Date.now()}`,
 					type: 'paragraph',
@@ -1419,29 +1414,6 @@ ${parties.map((party, index) => `<p>${index + 1}. <strong>${party.name}</strong>
 
 		return `[${processedContent}]`;
 	}
-
-	aiClauseAction = catchAsync(async (req, res) => {
-		const { contractId } = req.params;
-		const { action, text } = req.body;
-		if (!action || !text) {
-			return res.status(400).json({ error: 'Both action and text are required.' });
-		}
-		try {
-			const result = await contractAnalysisService.aiClauseAction(contractId, action, text);
-
-			// Save the action as a conversation action
-			const finalresult = await ConversationAction.create({
-				contractId,
-				userId: req.user.id,
-				actionType: action,
-				actionData: { text, result }
-			});
-
-			res.status(httpStatus.OK).json({ success: true, finalresult });
-		} catch (error) {
-			res.status(500).json({ success: false, error: error.message });
-		}
-	});
 
 	getConversationActions = catchAsync(async (req, res) => {
 		const { contractId } = req.params;

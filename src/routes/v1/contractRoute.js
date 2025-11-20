@@ -56,13 +56,6 @@ router.post(
 	validate(contractValidation.rewriteSection),
 	catchAsync(contractController.rewriteSection)
 );
-router.post(
-	'/suggest-clause',
-	authenticate(),
-	validate(contractValidation.suggestClause),
-	catchAsync(contractController.suggestClause)
-);
-
 // Shareable contract routes
 router.post(
 	'/:contractId/share',
@@ -158,13 +151,6 @@ router.get('/health/cache', authenticate(), catchAsync(contractController.getCac
 
 router.patch('/:contractId/favorite', authenticate(), catchAsync(contractController.addToFavorite));
 router.patch('/:contractId/unfavorite', authenticate(), catchAsync(contractController.removeFromFavorite));
-
-router.post(
-	'/:contractId/ai-clause-action',
-	authenticate(),
-	validate(contractValidation.aiClauseAction),
-	catchAsync(contractController.aiClauseAction)
-);
 
 // Fetch all conversation actions for a contract
 router.get('/:contractId/conversation-actions', authenticate(), catchAsync(contractController.getConversationActions));

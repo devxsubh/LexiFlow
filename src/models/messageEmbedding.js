@@ -90,14 +90,7 @@ messageEmbeddingSchema.methods.calculateSimilarity = function (otherEmbedding) {
 
 // Static method to find similar messages using MongoDB Atlas Vector Search
 messageEmbeddingSchema.statics.findSimilar = async function (queryEmbedding, options = {}) {
-	const {
-		userId,
-		conversationId,
-		limit = 10,
-		threshold = 0.7,
-		excludeMessageIds = [],
-		metadataFilter = {}
-	} = options;
+	const { userId, conversationId, limit = 10, threshold = 0.7, excludeMessageIds = [], metadataFilter = {} } = options;
 
 	try {
 		// Build filter for metadata
@@ -109,7 +102,7 @@ messageEmbeddingSchema.statics.findSimilar = async function (queryEmbedding, opt
 			filter.messageId = { $nin: excludeMessageIds };
 		}
 		if (Object.keys(metadataFilter).length > 0) {
-			Object.keys(metadataFilter).forEach(key => {
+			Object.keys(metadataFilter).forEach((key) => {
 				filter[`metadata.${key}`] = metadataFilter[key];
 			});
 		}
@@ -163,7 +156,7 @@ messageEmbeddingSchema.statics.findSimilar = async function (queryEmbedding, opt
 		// Fallback to JavaScript-based similarity if vector search fails
 		// (e.g., index not created yet, or not using Atlas)
 		console.warn('MongoDB Vector Search failed, falling back to JavaScript similarity:', error.message);
-		
+
 		// Build query for fallback
 		const query = { userId };
 		if (conversationId) {
@@ -173,7 +166,7 @@ messageEmbeddingSchema.statics.findSimilar = async function (queryEmbedding, opt
 			query.messageId = { $nin: excludeMessageIds };
 		}
 		if (Object.keys(metadataFilter).length > 0) {
-			Object.keys(metadataFilter).forEach(key => {
+			Object.keys(metadataFilter).forEach((key) => {
 				query[`metadata.${key}`] = metadataFilter[key];
 			});
 		}
@@ -182,18 +175,18 @@ messageEmbeddingSchema.statics.findSimilar = async function (queryEmbedding, opt
 		const candidates = await this.find(query).limit(limit * 3);
 
 		// Calculate similarity for each candidate
-		const scored = candidates.map(doc => ({
+		const scored = candidates.map((doc) => ({
 			doc,
 			similarity: doc.calculateSimilarity(queryEmbedding)
 		}));
 
 		// Filter by threshold and sort by similarity
 		const filtered = scored
-			.filter(item => item.similarity >= threshold)
+			.filter((item) => item.similarity >= threshold)
 			.sort((a, b) => b.similarity - a.similarity)
 			.slice(0, limit);
 
-		return filtered.map(item => ({
+		return filtered.map((item) => ({
 			messageId: item.doc.messageId,
 			conversationId: item.doc.conversationId,
 			content: item.doc.content,
@@ -208,4 +201,3 @@ messageEmbeddingSchema.statics.findSimilar = async function (queryEmbedding, opt
 const MessageEmbedding = mongoose.model('MessageEmbedding', messageEmbeddingSchema);
 
 export default MessageEmbedding;
-

@@ -1,7 +1,6 @@
 /* eslint-disable prettier/prettier */
 import User from '~/models/userModel';
 import logger from './logger';
-import Clause from '~/models/Clause';
 import Plan from '~/models/Plan';
 import Role from '~/models/roleModel';
 import config from './config';
@@ -135,93 +134,6 @@ async function initialData() {
 			}
 		} else if (config.NODE_ENV === 'production') {
 			logger.info('Skipping default user creation in production environment');
-		}
-
-		// Seed initial clauses if none exist
-		const countClauses = await Clause.estimatedDocumentCount();
-		if (countClauses === 0) {
-			await Clause.insertMany([
-				{
-					title: 'Confidentiality',
-					content:
-						'The parties agree to keep all information confidential and not disclose it to any third party without prior written consent.',
-					category: 'General',
-					jurisdiction: 'India',
-					useCases: ['NDA', 'Employment', 'Service Agreement'],
-					keywords: ['confidential', 'non-disclosure', 'privacy'],
-					isMustHave: true,
-					contractTypes: ['NDA', 'Employment', 'Service Agreement'],
-					tone: 'Formal'
-				},
-				{
-					title: 'Limitation of Liability',
-					content:
-						'Neither party shall be liable for any indirect, incidental, or consequential damages arising out of this agreement.',
-					category: 'General',
-					jurisdiction: 'India',
-					useCases: ['Service Agreement', 'Partnership'],
-					keywords: ['liability', 'damages', 'indirect'],
-					isMustHave: true,
-					contractTypes: ['Service Agreement', 'Partnership'],
-					tone: 'Formal'
-				},
-				{
-					title: 'Termination for Convenience',
-					content: 'Either party may terminate this agreement for any reason with 30 days written notice.',
-					category: 'General',
-					jurisdiction: 'India',
-					useCases: ['Service Agreement', 'Employment'],
-					keywords: ['termination', 'notice', 'convenience'],
-					isMustHave: false,
-					contractTypes: ['Service Agreement', 'Employment'],
-					tone: 'Neutral'
-				},
-				{
-					title: 'Payment Terms',
-					content: 'Payments shall be made within 30 days of invoice receipt.',
-					category: 'General',
-					jurisdiction: 'India',
-					useCases: ['Service Agreement', 'Consulting'],
-					keywords: ['payment', 'invoice', 'terms'],
-					isMustHave: true,
-					contractTypes: ['Service Agreement', 'Consulting'],
-					tone: 'Formal'
-				},
-				{
-					title: 'Intellectual Property Ownership',
-					content: 'All intellectual property created under this agreement shall be owned by the client.',
-					category: 'General',
-					jurisdiction: 'India',
-					useCases: ['Service Agreement', 'Development'],
-					keywords: ['intellectual property', 'ownership', 'IP'],
-					isMustHave: true,
-					contractTypes: ['Service Agreement', 'Development'],
-					tone: 'Formal'
-				},
-				{
-					title: 'Force Majeure',
-					content: 'Neither party shall be liable for failure to perform due to causes beyond their reasonable control.',
-					category: 'General',
-					jurisdiction: 'India',
-					useCases: ['All'],
-					keywords: ['force majeure', 'unforeseeable', 'control'],
-					isMustHave: true,
-					contractTypes: ['All'],
-					tone: 'Formal'
-				},
-				{
-					title: 'Governing Law',
-					content: 'This agreement shall be governed by and construed in accordance with the laws of India.',
-					category: 'General',
-					jurisdiction: 'India',
-					useCases: ['All'],
-					keywords: ['governing law', 'jurisdiction'],
-					isMustHave: true,
-					contractTypes: ['All'],
-					tone: 'Formal'
-				}
-			]);
-			logger.info('Clauses seeded successfully');
 		}
 	} catch (err) {
 		logger.error(err);

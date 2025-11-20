@@ -1,9 +1,7 @@
-import DashboardStats from '../models/DashboardStats.js';
 import Contract from '../models/contract.js';
 import User from '../models/userModel.js';
 // Consultation model removed - simplified app
 import Conversation from '../models/conversation.model.js';
-import cacheService from './cacheService.js';
 import APIError from '../utils/apiError.js';
 import httpStatus from 'http-status';
 
@@ -12,22 +10,8 @@ class DashboardService {
 		try {
 			const cacheKey = `dashboard_stats:${userId}:${period}`;
 
-			// Try to get from cache first
-			const cached = await cacheService.getCachedDashboardStats(cacheKey);
-			if (cached) {
-				return cached;
-			}
-
-			// Get latest stats from database
-			let stats = await DashboardStats.getLatestStats(userId, period);
-
-			if (!stats) {
-				// Calculate fresh stats if none exist
-				stats = await this.calculateDashboardStats(userId, period);
-			}
-
-			// Cache the result
-			await cacheService.cacheDashboardStats(cacheKey, stats, 300); // 5 minutes cache
+			// Calculate fresh stats (no longer using DashboardStats model)
+			const stats = await this.calculateDashboardStats(userId, period);
 
 			return stats;
 		} catch (error) {
@@ -83,8 +67,8 @@ class DashboardService {
 				}
 			};
 
-			// Save or update dashboard stats
-			const dashboardStats = new DashboardStats({
+			// Return stats object (no longer saving to database)
+			return {
 				userId,
 				period,
 				metrics,
@@ -92,11 +76,7 @@ class DashboardService {
 					lastUpdated: now,
 					dataSource: 'calculated'
 				}
-			});
-
-			await dashboardStats.save();
-
-			return dashboardStats;
+			};
 		} catch (error) {
 			throw new APIError('Failed to calculate dashboard stats', httpStatus.INTERNAL_SERVER_ERROR);
 		}
@@ -201,18 +181,8 @@ class DashboardService {
 
 	async getStatsHistory(userId, startDate, endDate, period = 'week') {
 		try {
-			const cacheKey = `dashboard_history:${userId}:${startDate}:${endDate}:${period}`;
-
-			// Try to get from cache first
-			const cached = await cacheService.getCachedDashboardStats(cacheKey);
-			if (cached) {
-				return cached;
-			}
-
-			const history = await DashboardStats.getStatsHistory(userId, startDate, endDate);
-
-			// Cache the result
-			await cacheService.cacheDashboardStats(cacheKey, history, 600); // 10 minutes cache
+			// Calculate stats for the date range (no longer using DashboardStats model)
+			const history = await this.calculateMetrics(userId, new Date(startDate), new Date(endDate));
 
 			return history;
 		} catch (error) {
@@ -222,14 +192,6 @@ class DashboardService {
 
 	async getMetricDetails(userId, metric, period = 'week', limit = 10) {
 		try {
-			const cacheKey = `dashboard_metric:${userId}:${metric}:${period}:${limit}`;
-
-			// Try to get from cache first
-			const cached = await cacheService.getCachedDashboardStats(cacheKey);
-			if (cached) {
-				return cached;
-			}
-
 			let details = {};
 
 			switch (metric) {
@@ -243,9 +205,6 @@ class DashboardService {
 					details = await this.getAIConversationDetails(userId, period, limit);
 					break;
 			}
-
-			// Cache the result
-			await cacheService.cacheDashboardStats(cacheKey, details, 300); // 5 minutes cache
 
 			return details;
 		} catch (error) {
@@ -320,12 +279,7 @@ class DashboardService {
 
 	async refreshDashboardStats(userId) {
 		try {
-			// Clear cache for this user
-			await cacheService.invalidateCache(`dashboard_stats:${userId}:*`);
-			await cacheService.invalidateCache(`dashboard_history:${userId}:*`);
-			await cacheService.invalidateCache(`dashboard_metric:${userId}:*`);
-
-			// Recalculate stats for all periods
+			// Recalculate stats for all periods (no longer using cache or DashboardStats model)
 			const periods = ['week', 'month', 'year'];
 			for (const period of periods) {
 				await this.calculateDashboardStats(userId, period);
